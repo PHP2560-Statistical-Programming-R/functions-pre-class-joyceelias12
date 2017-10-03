@@ -96,15 +96,91 @@ bmi     Body Mass Index
 ### Question 1: Standardize Function
 
 A. Create a function called standardize.me() that takes a numeric vector as an argument, and returns the standardized version of the vector. 
-B. Assign all the numeric columns of the original WCGS dataset to a new dataset called WCGS.new.
+```{r} 
+## Version 1 using map function
+standardize.me<-function(x){
+ avg<- map_dbl(x,mean,na.rm=TRUE)
+  denominator<-map(x,sd,na.rm=TRUE)
+  answer<-(x-avg)/denominator
+  return(answer)
+}
+
+## version 2 using traditional subsetting
+standardize.me2<-function(x){
+  answer<-matrix(ncol=ncol(x),nrow=nrow(x))
+
+  for (i in 1:ncol(x)){
+ answer[,i]<-(x[,i]- colMeans(x[i],na.rm=TRUE))/sd(x[,i],na.rm=TRUE)
+  }
+return(answer)
+}
+```
+B. Assign all the numeric columns of the original WCGS dataset to a new dataset called WCGS.new. 
+```{r}
+library(dplyr)
+WCGS.new<-
+  wcgs%>%
+  select(age,height,weight,sbp,dbp,chol,ncigs,bmi)
+```
 C. Using a loop and your new function, standardize all the variables WCGS.new dataset.
+```{r}
+x=WCGS.new
+new_standardize<-matrix(ncol=ncol(x),nrow=nrow(x))
+for ( i in 1:ncol(x)){
+  new_standardize<-standardize.me(x)
+ 
+}
+  
+
+```
 D. What should the mean and standard deviation of all your new standardized variables be? Test your prediction by running a loop
-
-
+```{r}
+for ( i in 1:seq_along(ncol(new_standardize))) {
+ y<-map_dbl(new_standardize,mean,na.rm=TRUE)
+  z<-map_dbl(new_standardize,sd,na.rm=TRUE)
+  print(y,z)
+}
+```
 
 
 ### Question 2: Looping to Calculate
 
 A. Using a loop, calculate the mean weight of the subjects separated by the type of CHD they have.
+```{r}
+
+no_chd<-numeric(0)
+MI_SD<-numeric(0)
+silent_MI<-numeric(0)
+angina<-numeric(0)
+
+no_chd_weight<-vector()
+MI_SD_weight<-vector()
+silent_weight<-vector()
+angina_weight<-vector()
+
+for (i in 1 :nrow(wcgs)){
+  if(wcgs$typchd69[i]=="no CHD"){ 
+   no_chd_weight[i]<- wcgs$weight[i]
+   no_chd<-mean(no_chd_weight,na.rm=TRUE)
+
+  }else if (wcgs$typchd69[i]=="MI or SD") {
+    MI_SD_weight[i]<-wcgs$weight[i]
+    MI_SD<-mean(MI_SD_weight,na.rm=TRUE)
+  } else if (wcgs$typchd69[i]=="silent MI"){
+    silent_weight[i]<-wcgs$weight[i]
+    silent_MI <- mean(silent_weight,na.rm=TRUE)
+  } else if ( wcgs$typchd69[i]=="angina")
+  angina_weight[i]<-wcgs$weight[i]
+    angina<-mean(angina_weight,na.rm=TRUE)
+}
+print(c(no_chd,MI_SD,silent_MI,angina))
+
+```
+
 B. Now do the same thing, but now don’t use a loop
+```{r}
+wcgs %>%
+  group_by(typchd69) %>%
+  summarise(average= mean(weight,na.rm=TRUE))
+```
 
