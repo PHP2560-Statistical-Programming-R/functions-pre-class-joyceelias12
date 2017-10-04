@@ -2,7 +2,9 @@
 title: "Functions - Pre-Class Work"
 author: "Adam J Sullivan"
 date: "September 29, 2017"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -124,10 +126,11 @@ WCGS.new<-
 ```
 C. Using a loop and your new function, standardize all the variables WCGS.new dataset.
 ```{r}
+library(purrr)
 x=WCGS.new
 new_standardize<-matrix(ncol=ncol(x),nrow=nrow(x))
 for ( i in 1:ncol(x)){
-  new_standardize<-standardize.me(x)
+  new_standardize[i]<-standardize.me(x[i])
  
 }
   
@@ -135,11 +138,16 @@ for ( i in 1:ncol(x)){
 ```
 D. What should the mean and standard deviation of all your new standardized variables be? Test your prediction by running a loop
 ```{r}
-for ( i in 1:seq_along(ncol(new_standardize))) {
+
  y<-map_dbl(new_standardize,mean,na.rm=TRUE)
+ mean_standardize<-mean(y,na.rm=TRUE)
+ new_standardize<-as.data.frame(new_standardize)
   z<-map_dbl(new_standardize,sd,na.rm=TRUE)
-  print(y,z)
-}
+  sd_standardized<-mean(z,na.rm=TRUE)
+  print(mean_standardize)
+  print(sd_standardized)
+
+  # I used the map functions because I wanted to test out my knowledge of th functions
 ```
 
 
